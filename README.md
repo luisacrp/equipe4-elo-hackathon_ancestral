@@ -1,6 +1,21 @@
 # Portal Petronect — Comportamento de Acesso & Reengajamento
 
-Protótipo desenvolvido para o desafio **Conexão Ancestral** (Hackathon Petronect × KODIE Academy).
+Protótipo desenvolvido pela Elo para o desafio **Conexão Ancestral** (Hackathon Petronect × KODIE Academy).
+
+## 🚀 Solução Online (Deploy)
+
+O projeto já se encontra em produção e pode ser acessado através dos links abaixo:
+
+- **Dashboard / Interface (Streamlit):** [Acessar a Aplicação](https://elo-hackathonancestral-petronect.streamlit.app/)
+- **Servidor / API (Render):** [Acessar o Ambiente Render](https://equipe4-elo-hackathon-ancestral.onrender.com/)
+
+---
+
+## 🎥 Materiais de Apresentação
+
+- **Pitch / Vídeo de Apresentação:** [🔗 Inserir Link do YouTube aqui]
+- **Apresentação de Slides:** [🔗 Inserir Link dos Slides aqui]
+- **Arquivos Adicionais:** [🔗 Inserir Link do Google Drive aqui]
 
 ## O problema
 
