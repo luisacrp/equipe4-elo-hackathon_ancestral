@@ -27,6 +27,12 @@ regra da fila: bloqueados, inativos, novos, exploradores e esporádicos. Dentro
 do segmento, maior recência em dias vem primeiro; empates usam o identificador.
 Essa ordem é uma política de negócio, não uma estimativa de impacto ou resposta.
 
+A interface destaca os dois primeiros grupos em cartões e reúne as demais
+frentes em uma área expansível. A distribuição por segmento e o funil aparecem
+lado a lado. No painel de revisão, o filtro de grupo controla a lista, a seleção
+de fornecedor e o CSV exportado. Evidências detalhadas e mensagens ficam sob
+demanda. Os gráficos representam contagens observadas, sem alterar a prioridade.
+
 Os candidatos à revisão são os fornecedores identificados com prioridade maior
 que zero. Cada fornecedor integra apenas um grupo, conforme a segmentação
 existente. A lista não confirma elegibilidade: preferências e histórico devem
