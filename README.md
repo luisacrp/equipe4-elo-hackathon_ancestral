@@ -14,8 +14,8 @@ O projeto já se encontra em produção e pode ser acessado através dos links a
 ## 🎥 Materiais de Apresentação
 
 - **Pitch / Vídeo de Apresentação:** [🔗 Inserir Link do YouTube aqui]
-- **Apresentação de Slides:** [🔗 Inserir Link dos Slides aqui]
-- **Arquivos Adicionais:** [🔗 Inserir Link do Google Drive aqui]
+- **Apresentação de Slides:** https://drive.google.com/file/d/1D5GvspHM72RE4Zx0thZiVmruOxtPWDps/view?usp=drive_link
+- **Arquivos Adicionais:** https://docs.google.com/document/d/1J_imYMmOGr9qrPesqJlwKdkpvv0eZ62Y/edit?usp=drive_link&ouid=105789610852981567851&rtpof=true&sd=true
 
 ## O problema
 
@@ -158,7 +158,6 @@ grava em `../dados`, e assim por diante).
 ## Equipe
 
 - Luísa Costa Rodrigues Pereira
+- Maria Arielly Lima de Oliveira
 - Caroline Gabrielly Campos do Nascimento
 - Ingrid de Oliveira Braga
-- Maria Arielly Lima de Oliveira
-- Mariana Alves Santana
