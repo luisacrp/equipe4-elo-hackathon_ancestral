@@ -1,11 +1,6 @@
-# Versões fixadas de propósito: o Streamlit Community Cloud instala a
-# última versão disponível quando o requirements.txt usa ">=", e isso já
-# gerou warnings de depreciação (use_container_width) numa apresentação
-# ao vivo. Fixar exatamente o que foi testado evita esse risco no deploy
-# de amanhã. Todas as versões abaixo foram confirmadas como releases
-# reais e estáveis em setembro de 2026.
-streamlit==1.63.0
-pandas==3.0.5
-scikit-learn==1.9.1
-numpy>=1.26
-requests==2.33.1
+# Versões usadas na validação local com Python 3.13 e Streamlit AppTest.
+streamlit==1.50.0
+pandas==2.3.1
+scikit-learn==1.7.1
+numpy==2.4.6
+requests==2.32.5

@@ -11,9 +11,19 @@ os fornecedores acessam, não só "quantos cliques" aconteceram.
 
 ## Funil & Sessionização
 
-Calculado sobre todas as sessões — anônimas e identificadas — porque a
-pergunta "onde o visitante clica primeiro" não pode ser respondida olhando
-só quem já fez login.
+Considera sessões anônimas e identificadas. O funil conta prefixos completos
+na ordem temporal dentro da mesma sessão, permitindo páginas intermediárias
+e contando cada sessão uma vez por etapa. Empates de horário usam a ordem
+do evento na sessão. O denominador percentual é quem alcançou a primeira
+etapa. Alcance independente conta visitas sem exigir as etapas anteriores.
+Entradas diretas e jornadas já autenticadas podem converter fora deste funil.
+O maior gargalo usa o volume absoluto perdido, não uma atribuição causal.
+
+## Visão executiva
+
+Reutiliza o funil sequencial. O cenário de recuperação multiplica os abandonos
+da transição selecionada por uma hipótese ajustável. Estima apenas avanços
+nessa transição, sem inferir propostas, receita ou ganho observado.
 
 ## Segmentação por regras
 

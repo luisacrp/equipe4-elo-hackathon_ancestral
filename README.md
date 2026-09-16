@@ -54,6 +54,11 @@ da análise à ação:
 
 ## Como executar localmente
 
+A primeira aba, **Visão executiva**, resume a conversão sequencial e permite
+explorar um cenário hipotético de recuperação do maior gargalo. O funil distingue
+alcance por página de avanço ordenado na mesma sessão e exporta o diagnóstico.
+Veja o [roteiro de pitch e próximos passos](docs/MELHORIAS_E_PITCH.md).
+
 > Execute todos os comandos abaixo a partir da **raiz do projeto** (a
 > pasta que contém `app/`, `captura/`, `dados/` etc.). Os scripts
 > localizam seus próprios arquivos automaticamente (usam o caminho do
@@ -97,11 +102,7 @@ privacidade em [`docs/LGPD.md`](docs/LGPD.md) e as decisões metodológicas
 por trás de cada aba em
 [`docs/NOTAS_METODOLOGICAS.md`](docs/NOTAS_METODOLOGICAS.md).
 
-## Solução online
-
-*(inserir aqui o link gerado após o deploy no Streamlit Community Cloud)*
-
-*(inserir aqui o link do vídeo no YouTube, como não listado)*
+## Configuração da solução online
 
 O dashboard (Streamlit Community Cloud) e o servidor de captura
 (`tracker_server.py`, hospedado separadamente, por exemplo na Render)
@@ -119,8 +120,9 @@ grava em `../dados`, e assim por diante).
 ```
 .
 ├── app/
-│   ├── app.py                    # Dashboard Streamlit (9 abas — ver seção "A solução")
-│   └── .streamlit/config.toml    # Tema visual customizado
+│   ├── app.py                    # Dashboard Streamlit (10 abas — ver seção "A solução")
+│   ├── analise_jornada.py        # Funil sequencial e diagnóstico de abandono
+├── .streamlit/config.toml        # Tema visual customizado (raiz exigida pelo Cloud)
 ├── captura/                      # Camada de captura ao vivo (ver docs/README_CAPTURA.md)
 │   ├── tracker.js                # Snippet de captura (cookie + session_id)
 │   ├── tracker_server.py         # Endpoint Flask que grava dados/eventos_live.csv

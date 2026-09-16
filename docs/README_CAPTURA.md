@@ -104,15 +104,19 @@ implementada no código; resta apenas publicar os dois serviços.
 1. No mesmo repositório, acesse
    [share.streamlit.io](https://share.streamlit.io) e crie um novo
    aplicativo apontando para `app/app.py`.
-2. Em **Advanced settings → Secrets**, adicione:
+2. Em **Advanced settings**, selecione **Python 3.13** (versão validada
+   localmente). Em **Secrets**, adicione:
    ```toml
    TRACKER_URL = "https://conexao-ancestral-tracker.onrender.com"
    ```
    (substitua pela URL real obtida na etapa anterior, sem barra ao
    final).
-3. Conclua o deploy. O dashboard já inicia na aba "Captura ao vivo"
-   consultando eventos dessa URL, sem necessidade de configuração manual
-   adicional.
+3. Conclua o deploy. Ao abrir a aba "Captura ao vivo", o dashboard consulta
+   eventos dessa URL, sem necessidade de configuração manual adicional.
+
+Inclua no commit `app/analise_jornada.py`, os três CSVs de `dados/`,
+`requirements.txt` e `.streamlit/config.toml` na raiz. O histórico de envios
+é salvo em arquivo local e pode se perder quando a instância for recriada.
 
 ### 3. Validação do fluxo completo já publicado
 

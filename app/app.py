@@ -14,6 +14,7 @@ Rodar localmente:
 
 import csv
 import os
+import sys
 import time
 from datetime import datetime
 
@@ -31,6 +32,10 @@ from sklearn.metrics import silhouette_score
 #    da pasta app/, com os dados em ../dados/).
 # ------------------------------------------------------------------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+if BASE_DIR not in sys.path:
+    sys.path.insert(0, BASE_DIR)
+from analise_jornada import calcular_funil, maior_gargalo
+
 DADOS_DIR = os.path.normpath(os.path.join(BASE_DIR, "..", "dados"))
 
 # Camada de captura (tracker.js -> tracker_server.py -> eventos_live.csv)
@@ -503,7 +508,11 @@ col4.metric(
 
 st.divider()
 
+funil_sequencial = calcular_funil(df)
+gargalo = maior_gargalo(funil_sequencial)
+
 (
+    aba_resumo,
     aba_geral,
     aba_funil,
     aba_regra,
@@ -515,6 +524,7 @@ st.divider()
     aba_ao_vivo,
 ) = st.tabs(
     [
+        "Visão executiva",
         "Tendência de acessos",
         "Funil & Sessionização",
         "Segmentação por regras",
@@ -526,6 +536,37 @@ st.divider()
         "Captura ao vivo",
     ]
 )
+
+with aba_resumo:
+    st.subheader("Do comportamento à próxima ação")
+    st.write(
+        "Identifique onde a jornada perde visitantes, escolha o público para "
+        "reengajar e acompanhe o retorno. Os indicadores abaixo usam a base simulada."
+    )
+    entrada_funil = int(funil_sequencial.iloc[0]["Sessões na sequência"])
+    conclusoes = int(funil_sequencial.iloc[-1]["Sessões na sequência"])
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Sessões que iniciaram o funil", f"{entrada_funil:,}")
+    c2.metric("Jornadas completas na mesma sessão", f"{conclusoes:,}")
+    c3.metric("Conversão da jornada", f"{conclusoes / entrada_funil * 100:.1f}%" if entrada_funil else "Sem dados")
+    if gargalo:
+        st.info(
+            f"Prioridade de investigação: {gargalo['origem']} → {gargalo['destino']}. "
+            f"{gargalo['perdas']:,} sessões não avançaram nessa transição."
+        )
+        recuperacao = st.slider("Hipótese de recuperação dos abandonos (%)", 0, 100, 10, 5)
+        st.metric("Avanços adicionais no cenário", f"{round(gargalo['perdas'] * recuperacao / 100):,}")
+        st.caption(
+            "Cenário hipotético: abandonos × percentual escolhido. Mede avanços apenas "
+            "na transição selecionada; não estima propostas, receita ou efeito comprovado."
+        )
+    st.markdown(
+        "1. **Investigar:** abra Funil & Sessionização para localizar a perda.\n"
+        "2. **Agir:** abra Fila & Próxima ação e revise a comunicação de um fornecedor.\n"
+        "3. **Validar:** demonstre Captura ao vivo e planeje comparar retorno e propostas "
+        "em até 7 dias entre fornecedores sorteados para contato e controle."
+    )
+    st.caption("Anônimos são analisados por sessão; contato individual depende de identificação e elegibilidade.")
 
 # --- Aba: Tendência de acessos ao longo do tempo -------------------
 with aba_geral:
@@ -569,54 +610,37 @@ with aba_funil:
         )
         st.dataframe(entrada, hide_index=True, width="stretch")
 
-    ETAPAS_FUNIL = {
-        "1. Lista/busca pública": [
-            "lista_oportunidades_publicas",
-            "busca_publica",
-            "home_publica",
-        ],
-        "2. Detalhe da oportunidade": [
-            "detalhe_oportunidade_publica",
-            "detalhe_oportunidade",
-        ],
-        "3. Tenho interesse": ["tenho_interesse"],
-        "4. Login / Identificação": ["login", "iniciar_identificacao"],
-        "5. Envio de proposta": ["envio_proposta"],
-    }
-    linhas_funil = []
-    for nome, paginas in ETAPAS_FUNIL.items():
-        n = df[df["pagina"].isin(paginas)]["session_id"].nunique()
-        linhas_funil.append(
-            {"etapa": nome, "sessões": n, "% do topo do funil": round(n / total_sessoes * 100, 1)}
-        )
-    funil_df = pd.DataFrame(linhas_funil)
+    funil_df = funil_sequencial
 
     with colB:
-        st.markdown("**Funil (sessões únicas por etapa)**")
+        st.markdown("**Funil sequencial na mesma sessão**")
         st.dataframe(
-            funil_df.rename(columns={"etapa": "Etapa", "sessões": "Sessões"}),
+            funil_df,
             hide_index=True,
             width="stretch",
         )
 
     st.bar_chart(
-        funil_df.set_index("etapa")["sessões"].rename_axis("Etapa").rename("Sessões"),
+        funil_df.set_index("Etapa")["Sessões na sequência"],
         horizontal=True,
     )
 
-    quedas = []
-    for i in range(1, len(funil_df)):
-        anterior = funil_df.iloc[i - 1]["sessões"]
-        atual = funil_df.iloc[i]["sessões"]
-        queda_pct = (anterior - atual) / anterior * 100 if anterior else 0
-        quedas.append((funil_df.iloc[i - 1]["etapa"], funil_df.iloc[i]["etapa"], queda_pct))
-    etapa_de, etapa_para, pior_queda = max(quedas, key=lambda x: x[2])
-
-    st.warning(
-        f"**Maior ponto de perda do funil:** de '{etapa_de}' para '{etapa_para}' — "
-        f"queda de {pior_queda:.0f}% das sessões. É onde uma intervenção (FAQ na "
-        "página de detalhe, prova social, redução de fricção no clique de "
-        "interesse) teria o maior impacto por sessão perdida."
+    st.caption(
+        "Cada etapa exige as anteriores em ordem na mesma sessão. Alcance independente "
+        "inclui também entradas diretas e outras jornadas, como usuários já autenticados. "
+        "Abandono significa não avançar nesta sessão; não comprova desistência definitiva."
+    )
+    if gargalo:
+        st.warning(
+            f"Maior perda em volume: {gargalo['origem']} → {gargalo['destino']} "
+            f"({gargalo['perdas']:,} sessões). Investigue essa transição e teste uma "
+            "intervenção com grupo de controle antes de atribuir causa ou impacto."
+        )
+    else:
+        st.info("Não há abandonos mensuráveis neste funil.")
+    st.download_button(
+        "Exportar diagnóstico do funil", funil_df.to_csv(index=False).encode("utf-8-sig"),
+        file_name="diagnostico_funil.csv", mime="text/csv",
     )
 
     st.divider()
