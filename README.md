@@ -54,10 +54,11 @@ da análise à ação:
 
 ## Como executar localmente
 
-A primeira aba, **Visão executiva**, resume a conversão sequencial e permite
-explorar um cenário hipotético de recuperação do maior gargalo. O funil distingue
-alcance por página de avanço ordenado na mesma sessão e exporta o diagnóstico.
-Veja o [roteiro de pitch e próximos passos](docs/MELHORIAS_E_PITCH.md).
+A primeira aba, **Visão executiva**, recomenda quem priorizar, apresenta evidências,
+ações e responsáveis sugeridos, e permite revisar fornecedores e exportar candidatos
+ao contato. O gargalo do funil orienta uma investigação de Produto. Não há projeção
+de recuperação: as decisões usam o comportamento observado na base simulada.
+Veja as [notas metodológicas](docs/NOTAS_METODOLOGICAS.md).
 
 > Execute todos os comandos abaixo a partir da **raiz do projeto** (a
 > pasta que contém `app/`, `captura/`, `dados/` etc.). Os scripts

@@ -21,9 +21,23 @@ O maior gargalo usa o volume absoluto perdido, não uma atribuição causal.
 
 ## Visão executiva
 
-Reutiliza o funil sequencial. O cenário de recuperação multiplica os abandonos
-da transição selecionada por uma hipótese ajustável. Estima apenas avanços
-nessa transição, sem inferir propostas, receita ou ganho observado.
+Apresenta recomendações por segmento, com evidência agregada, ação sugerida,
+equipe responsável e indicador para acompanhamento. A prioridade segue a mesma
+regra da fila: bloqueados, inativos, novos, exploradores e esporádicos. Dentro
+do segmento, maior recência em dias vem primeiro; empates usam o identificador.
+Essa ordem é uma política de negócio, não uma estimativa de impacto ou resposta.
+
+Os candidatos à revisão são os fornecedores identificados com prioridade maior
+que zero. Cada fornecedor integra apenas um grupo, conforme a segmentação
+existente. A lista não confirma elegibilidade: preferências e histórico devem
+ser revisados antes do contato. Engajados permanecem no acompanhamento de
+relacionamento. Cadastros sem eventos identificados não recebem recomendação.
+
+Permite revisar a mensagem, selecionar o fornecedor na aba de ação e exportar
+os candidatos com suas evidências. Selecionar não registra nem envia comunicação.
+Reutiliza o funil para recomendar investigação de Produto no maior gargalo.
+Os indicadores de retorno/proposta em 7 dias são sugestões para avaliação futura,
+não resultados medidos. A hipótese ajustável de recuperação foi removida.
 
 ## Segmentação por regras
 

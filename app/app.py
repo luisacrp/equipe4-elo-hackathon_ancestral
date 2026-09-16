@@ -35,6 +35,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 from analise_jornada import calcular_funil, maior_gargalo
+from recomendacoes import priorizar_fornecedores, resumir_recomendacoes, evidencia_fornecedor
 
 DADOS_DIR = os.path.normpath(os.path.join(BASE_DIR, "..", "dados"))
 
@@ -538,35 +539,121 @@ gargalo = maior_gargalo(funil_sequencial)
 )
 
 with aba_resumo:
-    st.subheader("Do comportamento à próxima ação")
+    st.subheader("Onde concentrar a atuação da equipe")
     st.write(
-        "Identifique onde a jornada perde visitantes, escolha o público para "
-        "reengajar e acompanhe o retorno. Os indicadores abaixo usam a base simulada."
+        "Recomendações para Marketing, Atendimento e Produto, justificadas pelo "
+        "comportamento dos fornecedores na janela analisada."
     )
+    st.caption(
+        f"Base simulada · posição em {DATA_REFERENCIA.strftime('%d/%m/%Y')} · "
+        "prioridade por regra de negócio, sem previsão de retorno financeiro."
+    )
+    fila_executiva = priorizar_fornecedores(metricas)
+    candidatos = fila_executiva[fila_executiva["prioridade"] > 0]
+    recomendacoes = resumir_recomendacoes(metricas)
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Candidatos à revisão de contato", len(candidatos),
+              help="Fornecedores dos segmentos com prioridade maior que zero. Ainda exigem revisão antes do contato.")
+    c2.metric("Prioridade 1: bloqueados", int(metricas.segmento_regra.eq("Bloqueado — taxa de acesso").sum()))
+    c3.metric("Prioridade 2: inativos", int(metricas.segmento_regra.eq("Inativo — risco de perda").sum()))
+    c4.metric("Engajados: manter relacionamento", int(metricas.segmento_regra.eq("Engajado convertendo").sum()))
+
+    if recomendacoes:
+        primeira = recomendacoes[0]
+        st.info(
+            f"**Decisão sugerida: {primeira['decisao'].lower()}.** "
+            f"Começar pela revisão dos {primeira['quantidade']} fornecedores do grupo "
+            f"“{primeira['segmento']}”, com {primeira['responsavel']}."
+        )
+    else:
+        st.info("Nenhum fornecedor nos grupos de contato prioritário. Manter o acompanhamento da base.")
+
+    st.markdown("### Plano de ação recomendado")
+    st.caption(
+        "Bloqueados → inativos → novos cadastros → exploradores → esporádicos. "
+        "A ordem organiza a revisão da equipe; não comprova maior chance de resposta. "
+        "Cada fornecedor pertence a apenas um segmento."
+    )
+    for indice, recomendacao in enumerate(recomendacoes):
+        with st.container(border=True):
+            st.markdown(f"**{indice + 1}. {recomendacao['decisao']}**")
+            st.caption(f"{recomendacao['segmento']} · {recomendacao['quantidade']} fornecedores")
+            st.write(f"**Evidência:** {recomendacao['evidencia']}")
+            st.write(f"**Ação recomendada:** {recomendacao['acao']}")
+            st.write(f"**Responsável sugerido:** {recomendacao['responsavel']}")
+            st.write(f"**Como acompanhar:** {recomendacao['indicador']}")
+
+    st.markdown("### Fornecedores para revisar primeiro")
+    st.caption(
+        "Dentro de cada segmento, a maior recência em dias vem primeiro. "
+        "Antes do contato, conferir preferências, opt-out e histórico de comunicações."
+    )
+    if not candidatos.empty:
+        selecao_executiva = candidatos.head(6).copy()
+        selecao_executiva["Evidência para revisão"] = selecao_executiva.apply(evidencia_fornecedor, axis=1)
+        st.dataframe(
+            selecao_executiva[["usuario_id", "empresa", "segmento_regra", "Evidência para revisão", "canal_sugerido"]]
+            .rename(columns=COLUNAS_LEGIVEIS), hide_index=True, width="stretch",
+        )
+        empresas_resumo = candidatos.set_index("usuario_id")["empresa"]
+        fornecedor_resumo = st.selectbox(
+            "Revisar recomendação de um fornecedor", options=candidatos["usuario_id"].tolist(),
+            format_func=lambda uid: f"{uid} — {empresas_resumo.loc[uid]}",
+            key="fornecedor_resumo",
+        )
+        fornecedor_revisao = candidatos[candidatos["usuario_id"] == fornecedor_resumo].iloc[0]
+        with st.expander("Ver evidência, ação e mensagem sugerida"):
+            st.write(evidencia_fornecedor(fornecedor_revisao))
+            st.write(f"**Canal sugerido:** {fornecedor_revisao['canal_sugerido']}")
+            st.write(fornecedor_revisao["mensagem_sugerida"])
+        if st.button("Selecionar este fornecedor para a ação", key="preparar_acao_executiva"):
+            st.session_state["select_usuario_acao"] = fornecedor_resumo
+            st.success("Fornecedor selecionado. Abra a aba ‘Ação de reengajamento’ para continuar a revisão.")
+        exportacao = candidatos[["usuario_id", "empresa", "segmento_regra", "canal_sugerido"]].copy()
+        exportacao["evidencia"] = candidatos.apply(evidencia_fornecedor, axis=1)
+        st.download_button(
+            "Exportar candidatos para revisão (CSV)",
+            exportacao.rename(columns={**COLUNAS_LEGIVEIS, "evidencia": "Evidência para revisão"})
+            .to_csv(index=False).encode("utf-8-sig"),
+            file_name=f"revisao_contatos_{DATA_REFERENCIA.date()}.csv", mime="text/csv",
+        )
+
+    st.markdown("### Decisão sobre a experiência no portal")
     entrada_funil = int(funil_sequencial.iloc[0]["Sessões na sequência"])
     conclusoes = int(funil_sequencial.iloc[-1]["Sessões na sequência"])
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Sessões que iniciaram o funil", f"{entrada_funil:,}")
-    c2.metric("Jornadas completas na mesma sessão", f"{conclusoes:,}")
-    c3.metric("Conversão da jornada", f"{conclusoes / entrada_funil * 100:.1f}%" if entrada_funil else "Sem dados")
     if gargalo:
-        st.info(
-            f"Prioridade de investigação: {gargalo['origem']} → {gargalo['destino']}. "
-            f"{gargalo['perdas']:,} sessões não avançaram nessa transição."
+        st.write(
+            f"**Evidência:** {gargalo['perdas']:,} sessões não avançaram de "
+            f"{gargalo['origem']} para {gargalo['destino']}, a maior perda em volume do funil."
         )
-        recuperacao = st.slider("Hipótese de recuperação dos abandonos (%)", 0, 100, 10, 5)
-        st.metric("Avanços adicionais no cenário", f"{round(gargalo['perdas'] * recuperacao / 100):,}")
+        st.write(
+            "**Recomendação para Produto:** revisar a clareza da navegação nessa transição "
+            "e observar fornecedores em um teste de uso antes de escolher a intervenção. "
+            "A perda indica onde investigar; não identifica a causa."
+        )
+        st.write(
+            "**Como acompanhar:** sessões que alcançam a próxima etapa / sessões que "
+            "chegam à etapa anterior. Compare uma alteração com a experiência atual em um teste controlado."
+        )
+    else:
+        st.write("Não há perda mensurável que justifique priorizar uma transição deste funil.")
+    if entrada_funil:
         st.caption(
-            "Cenário hipotético: abandonos × percentual escolhido. Mede avanços apenas "
-            "na transição selecionada; não estima propostas, receita ou efeito comprovado."
+            f"Contexto: {conclusoes} de {entrada_funil:,} sessões completaram a sequência "
+            f"até a proposta ({conclusoes / entrada_funil * 100:.1f}%). "
+            "Entradas diretas e propostas em outra sessão ficam fora dessa medida."
         )
-    st.markdown(
-        "1. **Investigar:** abra Funil & Sessionização para localizar a perda.\n"
-        "2. **Agir:** abra Fila & Próxima ação e revise a comunicação de um fornecedor.\n"
-        "3. **Validar:** demonstre Captura ao vivo e planeje comparar retorno e propostas "
-        "em até 7 dias entre fornecedores sorteados para contato e controle."
-    )
-    st.caption("Anônimos são analisados por sessão; contato individual depende de identificação e elegibilidade.")
+    with st.expander("Cobertura da análise e avaliação dos resultados"):
+        st.write(
+            f"{df['usuario_id'].isna().mean() * 100:.0f}% dos eventos não têm usuário identificado. "
+            f"{FORNECEDORES_SEM_EVENTO_NA_JANELA} cadastrados não têm evento identificado na janela "
+            "e não integram estas recomendações. Anônimos entram na análise da jornada, não na lista de contato."
+        )
+        st.write(
+            "Os indicadores do plano são sugestões para um piloto, ainda sem resultados de contato medidos. "
+            "Para avaliar efeito, sortear contato e controle entre fornecedores elegíveis do mesmo segmento "
+            "e observar ambos por 7 dias. As recomendações não executam envios."
+        )
 
 # --- Aba: Tendência de acessos ao longo do tempo -------------------
 with aba_geral:
@@ -843,21 +930,11 @@ with aba_fila:
     st.subheader("Fila priorizada de próxima melhor ação")
     st.caption("Prioriza quem contatar primeiro e exporta um CSV pronto para o CRM.")
 
-    PRIORIDADE_SEGMENTO = {
-        "Bloqueado — taxa de acesso": 5,
-        "Inativo — risco de perda": 4,
-        "Novo cadastro": 3,
-        "Explorador sem conversão": 2,
-        "Esporádico": 1,
-        "Engajado convertendo": 0,
-    }
-    fila = metricas.copy()
-    fila["prioridade"] = fila["segmento_regra"].map(PRIORIDADE_SEGMENTO)
-    fila = fila.sort_values(["prioridade", "recencia_dias"], ascending=[False, False])
+    fila = priorizar_fornecedores(metricas)
 
     st.caption(
         "Ordem: Bloqueado > Inativo > Novo cadastro > Explorador > Esporádico > "
-        "Engajado (que já converte sozinho e não é prioridade de contato)."
+        "Engajado (com atividade e conversão recentes, destinado ao relacionamento)."
     )
     st.dataframe(
         fila[
