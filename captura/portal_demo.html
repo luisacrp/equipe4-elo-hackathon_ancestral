@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<title>Petronect — Demonstração da camada de captura</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    --azul: #14356b;
+    --azul-2: #1f4c93;
+    --verde: #3bb273;
+    --bg: #f4f6fa;
+    --texto: #1c2733;
+    --linha: #dfe4ec;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: "Segoe UI", Arial, sans-serif;
+    background: var(--bg); color: var(--texto);
+  }
+  header {
+    background: var(--azul); color: #fff;
+    padding: 14px 28px; display: flex; align-items: center; justify-content: space-between;
+  }
+  header .marca { font-size: 20px; font-weight: 700; letter-spacing: .3px; }
+  header .marca span { color: #8fd4b0; }
+  header nav a {
+    color: #cfe0f7; text-decoration: none; margin-left: 22px; font-size: 14px;
+  }
+  .faixa {
+    background: var(--azul-2); color: #eaf1ff; font-size: 13px;
+    padding: 6px 28px;
+  }
+  main { max-width: 880px; margin: 32px auto; padding: 0 20px 60px; }
+  .card {
+    background: #fff; border: 1px solid var(--linha); border-radius: 6px;
+    padding: 28px 30px; margin-bottom: 20px;
+  }
+  h1 { font-size: 22px; margin: 0 0 6px; }
+  p.sub { color: #5a6472; margin-top: 0; }
+  .op-item {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 14px 0; border-bottom: 1px solid var(--linha);
+  }
+  .op-item:last-child { border-bottom: none; }
+  .op-item div strong { display: block; font-size: 14px; }
+  .op-item div small { color: #6b7684; }
+  a.btn, button.btn {
+    background: var(--verde); color: #fff; border: none; padding: 9px 18px;
+    border-radius: 4px; font-size: 13px; cursor: pointer; text-decoration: none;
+    display: inline-block;
+  }
+  a.link { color: var(--azul-2); text-decoration: none; font-size: 13px; cursor: pointer; }
+  .painel {
+    position: fixed; right: 16px; bottom: 16px; width: 300px;
+    background: #0f1b2d; color: #cfe0f7; border-radius: 8px; padding: 14px 16px;
+    font: 12px/1.5 monospace; box-shadow: 0 6px 20px rgba(0,0,0,.25);
+  }
+  .painel b { color: #8fd4b0; }
+  .painel .linha { display: flex; justify-content: space-between; margin: 3px 0; }
+  #login-box {
+    display: none; margin-top: 16px; padding: 16px; background: #fbfbfb;
+    border: 1px dashed var(--linha); border-radius: 6px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="marca">Petro<span>nect</span></div>
+  <nav>
+    <a href="#" data-nav="home_publica">Página inicial</a>
+    <a href="#" data-nav="lista_oportunidades_publicas">Oportunidades</a>
+    <a href="#">Cadastro no Petronect</a>
+  </nav>
+</header>
+<div class="faixa">Área pública — consulta sem login · demonstração da camada de captura</div>
+
+<main>
+
+  <!-- VIEW 1: home pública -->
+  <section class="card" data-view="home_publica">
+    <h1>Bem-vindo ao Portal Petronect</h1>
+    <p class="sub">Consulte oportunidades publicadas sem precisar de login.</p>
+    <a class="btn" href="#" data-nav="lista_oportunidades_publicas">Ver oportunidades publicadas</a>
+  </section>
+
+  <!-- VIEW 2: lista de oportunidades públicas -->
+  <section class="card" data-view="lista_oportunidades_publicas" style="display:none">
+    <h1>Lista de oportunidades abertas para propostas</h1>
+    <div class="op-item">
+      <div><strong>OP-2026-0054</strong><small>Pregão eletrônico · EPI e segurança</small></div>
+      <a class="link" data-nav="detalhe_oportunidade_publica" data-op="OP-2026-0054">ver detalhes →</a>
+    </div>
+    <div class="op-item">
+      <div><strong>OP-2026-0071</strong><small>Dispensa eletrônica · Válvulas industriais</small></div>
+      <a class="link" data-nav="detalhe_oportunidade_publica" data-op="OP-2026-0071">ver detalhes →</a>
+    </div>
+  </section>
+
+  <!-- VIEW 3: detalhe da oportunidade -->
+  <section class="card" data-view="detalhe_oportunidade_publica" style="display:none">
+    <h1 id="op-titulo">Detalhe da oportunidade</h1>
+    <p class="sub" id="op-sub">Pregão eletrônico · EPI e segurança</p>
+    <p>Descrição do objeto, prazos e condições de participação desta oportunidade.</p>
+    <a class="btn" href="#" data-nav="tenho_interesse">Tenho interesse</a>
+  </section>
+
+  <!-- VIEW 4: tenho interesse -> momento de identificação -->
+  <section class="card" data-view="tenho_interesse" style="display:none">
+    <h1>Para continuar, identifique-se</h1>
+    <p class="sub">Este é o momento em que um visitante anônimo vira um fornecedor conhecido.</p>
+    <button class="btn" id="btn-login">Iniciar identificação / Login</button>
+    <div id="login-box">
+      <p>Simulação de login concluída — sessão identificada.</p>
+      <p><strong>usuario_id:</strong> <span id="uid-gerado"></span></p>
+    </div>
+  </section>
+
+  <!-- VIEW 5 (automática, pós-login): área interna -->
+  <section class="card" data-view="painel_oportunidades" style="display:none">
+    <h1>Painel de Oportunidades</h1>
+    <p class="sub">Área interna — sessão identificada. Este acesso já chega ao dashboard com <code>usuario_id</code> preenchido.</p>
+    <p id="painel-uid"></p>
+  </section>
+
+</main>
+
+<div class="painel">
+  <div><b>Painel de captura (debug)</b></div>
+  <div class="linha"><span>anonymous_id</span><span id="dbg-aid">—</span></div>
+  <div class="linha"><span>session_id</span><span id="dbg-sid">—</span></div>
+  <div class="linha"><span>usuario_id</span><span id="dbg-uid">(anônimo)</span></div>
+  <div class="linha"><span>eventos enviados</span><span id="dbg-count">0</span></div>
+</div>
+
+<script src="tracker.js"></script>
+<script>
+  var contador = 0;
+  var trackOriginal = null; // atribuído após o tracker.js carregar
+
+  function registrarEvento() {
+    contador++;
+    document.getElementById("dbg-count").textContent = contador;
+    document.getElementById("dbg-aid").textContent = window.petronectAnonymousId.replace("anon_", "").slice(0, 10) + "…";
+    document.getElementById("dbg-sid").textContent = window.petronectSessionId ? window.petronectSessionId.slice(-14) : "—";
+  }
+
+  function mostrar(viewId, extra) {
+    document.querySelectorAll("[data-view]").forEach(function (el) {
+      el.style.display = (el.dataset.view === viewId) ? "block" : "none";
+    });
+    var area = (viewId === "painel_oportunidades") ? "interna" : "publica";
+    window.petronectTrack(viewId, area, extra || {});
+  }
+
+  // envolve petronectTrack só para alimentar o contador visual do painel de debug
+  (function () {
+    var original = window.petronectTrack;
+    window.petronectTrack = function () {
+      registrarEvento();
+      return original.apply(this, arguments);
+    };
+  })();
+
+  document.querySelectorAll("[data-nav]").forEach(function (el) {
+    el.addEventListener("click", function (e) {
+      e.preventDefault();
+      var alvo = el.dataset.nav;
+      var extra = {};
+      if (el.dataset.op) {
+        extra.oportunidade_id = el.dataset.op;
+        document.getElementById("op-titulo").textContent = "Oportunidade " + el.dataset.op;
+      }
+      mostrar(alvo, extra);
+    });
+  });
+
+  document.getElementById("btn-login").addEventListener("click", function () {
+    var uid = "U" + Math.floor(1000 + Math.random() * 9000);
+    window.PETRONECT_USER_ID = uid;
+    document.getElementById("uid-gerado").textContent = uid;
+    document.getElementById("login-box").style.display = "block";
+    document.getElementById("dbg-uid").textContent = uid;
+    window.petronectTrack("login", "publica", { usuario_id: uid, identificado: 1 });
+    setTimeout(function () {
+      document.getElementById("painel-uid").textContent = "usuario_id: " + uid;
+      mostrar("painel_oportunidades", { usuario_id: uid, identificado: 1 });
+    }, 900);
+  });
+
+  // dispara o primeiro evento (home) ao carregar a página
+  mostrar("home_publica");
+</script>
+</body>
+</html>
