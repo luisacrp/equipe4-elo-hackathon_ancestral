@@ -7,13 +7,13 @@ Protótipo desenvolvido pela Elo para o desafio **Conexão Ancestral** (Hackatho
 O projeto já se encontra em produção e pode ser acessado através dos links abaixo:
 
 - **Dashboard / Interface (Streamlit):** [Acessar a Aplicação](https://elo-hackathonancestral-petronect.streamlit.app/)
-- **Servidor / API (Render):** [Acessar o Ambiente Render](https://equipe4-elo-hackathon-ancestral.onrender.com/)
+- **Portal fictício (Render):** [Acessar o Ambiente Render](https://equipe4-elo-hackathon-ancestral.onrender.com/)
 
 ---
 
 ## 🎥 Materiais de Apresentação
 
-- **Pitch / Vídeo de Apresentação:** [🔗 Inserir Link do YouTube aqui]
+- **Pitch / Vídeo de Apresentação:** https://youtu.be/apu0UEnMXsk
 - **Apresentação de Slides:** https://drive.google.com/file/d/1D5GvspHM72RE4Zx0thZiVmruOxtPWDps/view?usp=drive_link
 - **Arquivos Adicionais:** https://docs.google.com/document/d/1J_imYMmOGr9qrPesqJlwKdkpvv0eZ62Y/edit?usp=drive_link&ouid=105789610852981567851&rtpof=true&sd=true
 
